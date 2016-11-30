@@ -261,6 +261,13 @@ def check_ior(raw_body, bind_address, loop):
     # Patch IOR
     ior = ior._replace(host=giop.to_byte_string(bind_address),
                        port=server_port)
+
+    # log tango device name
+    try:
+        device_name = giop.find_device_name(raw_body, start-4)
+        print("Device name : {}".format(device_name))
+    except AssertionError:
+        print("Device name not found")
     # Repack body
     return giop.repack_ior(raw_body, ior, start, stop)
 
