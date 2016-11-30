@@ -254,7 +254,6 @@ def check_ior(raw_body, bind_address, loop):
         return False
     ior, start, stop = ior
     host = giop.from_byte_string(ior.host)
-    key = host, ior.port, bind_address
     # Start port forwarding
     server, _, server_port = yield from get_forwarding(
         host, ior.port, HandlerType.DS, bind_address, loop=loop)
