@@ -11,6 +11,21 @@ from contextlib import closing
 from . import giop
 from . import zmqforward
 
+# systemd import
+import logging
+from logging import getLogger, Formatter, StreamHandler
+
+
+# create logger
+logger = getLogger("Tango gateway")
+# create console handler
+log_handler = StreamHandler()
+# create formater
+log_format = Formatter('%(name)s - %(levelname)s - %(message)s')
+log_handler.setFormatter(log_format)
+logger.addHandler(log_handler)
+logger.setLevel(logging.INFO)
+
 # Tokens
 
 IMPORT_DEVICE = b'DbImportDevice'
@@ -64,7 +79,7 @@ def get_connection(key, loop, only_check=False):
             host, port, loop=loop)
     # Connection broken
     except (ConnectionRefusedError, OSError):
-        print("Could not connect to {} port {}".format(host, port))
+        logger.warn("Could not connect to {} port {}".format(host, port))
         yield from stop_forwarding(key, loop)
         return False
     # Connection OK
@@ -144,7 +159,8 @@ def start_forwarding(host, port, handler_type,
         server, bind_address, server_port = yield from coro
     # Print and return
     msg = "Forwarding {} traffic on {} port {} to {} port {}"
-    print(msg.format(handler_type.name, bind_address, server_port, host, port))
+    msg = msg.format(handler_type.name, bind_address, server_port, host, port)
+    logger.info(msg)
     return server, bind_address, server_port
 
 
@@ -162,7 +178,7 @@ def stop_forwarding(key, loop):
     # Print
     host, port, _ = key
     msg = "Stopped forwarding traffic on {} port {} to {} port {}"
-    print(msg.format(bind_address, server_port, host, port))
+    logger.info(msg.format(bind_address, server_port, host, port))
 
 
 # Frame helper
@@ -264,9 +280,10 @@ def check_ior(raw_body, bind_address, loop):
     # log tango device name
     try:
         device_name = giop.find_device_name(raw_body, start-4)
-        print("Device name : {}".format(device_name))
+        logger.info("New connection to: {}".format(device_name))
     except AssertionError:
-        print("Device name not found")
+        msg = "Could not get device name in {} reply"
+        logger.warn(msg.format(IMPORT_DEVICE))
     # Repack body
     return giop.repack_ior(raw_body, ior, start, stop)
 
@@ -322,7 +339,7 @@ def check_zmq(raw_body, bind_address, loop):
     endpoints, start = result
     nb = len(endpoints)
     if nb > 2:
-        print('Discarding {}/{} endpoints'.format(nb-2, nb))
+        logger.info('Discarding {}/{} endpoints'.format(nb-2, nb))
         endpoints = endpoints[:2]
     # Exctract endpoints
     new_endpoints = []
