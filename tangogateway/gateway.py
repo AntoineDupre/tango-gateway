@@ -11,7 +11,7 @@ from contextlib import closing
 from . import giop
 from . import zmqforward
 
-# systemd import
+# Logging import
 import logging
 from logging import getLogger, Formatter, StreamHandler
 
@@ -276,7 +276,7 @@ def check_ior(raw_body, bind_address, loop):
     # Patch IOR
     ior = ior._replace(host=giop.to_byte_string(bind_address),
                        port=server_port)
-    # log tango device name
+    # Log tango device name
     try:
         device_name = giop.find_device_name(raw_body, start-4)
         logger.info("Providing access to device {}".format(device_name))
