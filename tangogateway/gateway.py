@@ -358,6 +358,9 @@ def check_zmq(raw_body, bind_address, loop):
 
 def run_gateway_server(bind_address, server_port, tango_host, debug=False):
     """Run a Tango gateway server."""
+    # Configure logger
+    if debug:
+        logger.setLevel(logging.DEBUG)
     # Initialize loop
     loop = asyncio.get_event_loop()
     loop.bind_address = bind_address
