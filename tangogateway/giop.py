@@ -150,11 +150,12 @@ def find_device_name(body, ior_start):
     # shift to the previous frame (argouts count of IMPORT_DEVICE command)
     start = start - 6
     argout_size, device_name_len = struct.unpack_from("II", body, start)
-    assert argout_size == IMPORT_DEVICE_ARGOUTS
+    if not argout_size == IMPORT_DEVICE_ARGOUTS:
+        raise ValueError("Not a valid body")
     frame_struct = "II{}s".format(device_name_len)
     _, _, device_name = struct.unpack_from(frame_struct, body, start)
-    # remove \x00
-    return device_name[:-1]
+    # remove last \x00
+    return device_name[:-1].decode()
 
 
 def find_ior(body, index=4):

@@ -16,12 +16,12 @@ import logging
 from logging import getLogger, Formatter, StreamHandler
 
 
-# create logger
+# Create logger
 logger = getLogger("Tango gateway")
-# create console handler
+# Create console handler
 log_handler = StreamHandler()
-# create formater
-log_format = Formatter('%(name)s - %(levelname)s - %(message)s')
+# Create formater
+log_format = Formatter('%(levelname)s - %(message)s')
 log_handler.setFormatter(log_format)
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
@@ -276,12 +276,11 @@ def check_ior(raw_body, bind_address, loop):
     # Patch IOR
     ior = ior._replace(host=giop.to_byte_string(bind_address),
                        port=server_port)
-
     # log tango device name
     try:
         device_name = giop.find_device_name(raw_body, start-4)
-        logger.info("New connection to: {}".format(device_name))
-    except AssertionError:
+        logger.info("Providing access to device {}".format(device_name))
+    except ValueError:
         msg = "Could not get device name in {} reply"
         logger.warn(msg.format(IMPORT_DEVICE))
     # Repack body
